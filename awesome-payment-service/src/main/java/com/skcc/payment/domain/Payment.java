@@ -1,14 +1,9 @@
 package com.skcc.payment.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+//@Data
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@ToString
 public class Payment {
 	
 	private long id;
@@ -22,103 +17,121 @@ public class Payment {
 	private String paid;
 	private String active;
 	private String createdAt;
+	
+	public Payment(long id, long accountId, long orderId, String paymentMethod, String paymentDetail1,
+			String paymentDetail2, String paymentDetail3, long price, String paid, String active, String createdAt) {
+		super();
+		this.id = id;
+		this.accountId = accountId;
+		this.orderId = orderId;
+		this.paymentMethod = paymentMethod;
+		this.paymentDetail1 = paymentDetail1;
+		this.paymentDetail2 = paymentDetail2;
+		this.paymentDetail3 = paymentDetail3;
+		this.price = price;
+		this.paid = paid;
+		this.active = active;
+		this.createdAt = createdAt;
+	}
 
-//	public Payment(long id, long accountId, String paymentMethod, String paymentDetail1, String paymentDetail2,
-//			String paymentDetail3, long price, String paid, String createdAt) {
-//		super();
-//		this.id = id;
-//		this.accountId = accountId;
-//		this.paymentMethod = paymentMethod;
-//		this.paymentDetail1 = paymentDetail1;
-//		this.paymentDetail2 = paymentDetail2;
-//		this.paymentDetail3 = paymentDetail3;
-//		this.price = price;
-//		this.paid = paid;
-//		this.createdAt = createdAt;
-//	}
-//
-//	public Payment() {}
-//
-//	public long getId() {
-//		return id;
-//	}
-//
-//	public void setId(long id) {
-//		this.id = id;
-//	}
-//
-//	public String getPaymentMethod() {
-//		return paymentMethod;
-//	}
-//
-//	public void setPaymentMethod(String paymentMethod) {
-//		this.paymentMethod = paymentMethod;
-//	}
-//
-//
-//	public String getPaymentDetail1() {
-//		return paymentDetail1;
-//	}
-//
-//	public void setPaymentDetail1(String paymentDetail1) {
-//		this.paymentDetail1 = paymentDetail1;
-//	}
-//
-//	public String getPaymentDetail2() {
-//		return paymentDetail2;
-//	}
-//
-//	public void setPaymentDetail2(String paymentDetail2) {
-//		this.paymentDetail2 = paymentDetail2;
-//	}
-//
-//	public String getPaymentDetail3() {
-//		return paymentDetail3;
-//	}
-//
-//	public void setPaymentDetail3(String paymentDetail3) {
-//		this.paymentDetail3 = paymentDetail3;
-//	}
-//
-//	public long getPrice() {
-//		return price;
-//	}
-//
-//	public void setPrice(long price) {
-//		this.price = price;
-//	}
-//	
-//
-//	public String getPaid() {
-//		return paid;
-//	}
-//
-//	public void setPaid(String paid) {
-//		this.paid = paid;
-//	}
-//
-//	public String getCreatedAt() {
-//		return createdAt;
-//	}
-//
-//	public void setCreatedAt(String createdAt) {
-//		this.createdAt = createdAt;
-//	}
-//	
-//
-//	public long getAccountId() {
-//		return accountId;
-//	}
-//
-//	public void setAccountId(long accountId) {
-//		this.accountId = accountId;
-//	}
-//
-//	@Override
-//	public String toString() {
-//		return "Payment [id=" + id + ", accountId=" + accountId + ", paymentMethod=" + paymentMethod
-//				+ ", paymentDetail1=" + paymentDetail1 + ", paymentDetail2=" + paymentDetail2 + ", paymentDetail3="
-//				+ paymentDetail3 + ", price=" + price + ", paid=" + paid + ", createdAt=" + createdAt + "]";
-//	}
+	public Payment() {}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(long accountId) {
+		this.accountId = accountId;
+	}
+
+	public long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(long orderId) {
+		this.orderId = orderId;
+	}
+
+	public String getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(String paymentMethod) {
+		this.paymentMethod = paymentMethod;
+	}
+
+	public String getPaymentDetail1() {
+		return paymentDetail1;
+	}
+
+	public void setPaymentDetail1(String paymentDetail1) {
+		this.paymentDetail1 = paymentDetail1;
+	}
+
+	public String getPaymentDetail2() {
+		return paymentDetail2;
+	}
+
+	public void setPaymentDetail2(String paymentDetail2) {
+		this.paymentDetail2 = paymentDetail2;
+	}
+
+	public String getPaymentDetail3() {
+		return paymentDetail3;
+	}
+
+	public void setPaymentDetail3(String paymentDetail3) {
+		this.paymentDetail3 = paymentDetail3;
+	}
+
+	public long getPrice() {
+		return price;
+	}
+
+	public void setPrice(long price) {
+		this.price = price;
+	}
+
+	public String getPaid() {
+		return paid;
+	}
+
+	public void setPaid(String paid) {
+		this.paid = paid;
+	}
+
+	public String getActive() {
+		return active;
+	}
+
+	public void setActive(String active) {
+		this.active = active;
+	}
+
+	public String getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(String createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	@Override
+	public String toString() {
+		return "Payment [id=" + id + ", accountId=" + accountId + ", orderId=" + orderId + ", paymentMethod="
+				+ paymentMethod + ", paymentDetail1=" + paymentDetail1 + ", paymentDetail2=" + paymentDetail2
+				+ ", paymentDetail3=" + paymentDetail3 + ", price=" + price + ", paid=" + paid + ", active=" + active
+				+ ", createdAt=" + createdAt + "]";
+	}
+	
+	
 
 }

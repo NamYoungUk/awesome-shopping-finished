@@ -2,6 +2,8 @@ package com.skcc.accountbank.service;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,12 +17,11 @@ import com.skcc.accountbank.event.message.AccountBankPayload;
 import com.skcc.accountbank.publish.AccountBankPublish;
 import com.skcc.accountbank.repository.AccountBankMapper;
 
-import lombok.extern.java.Log;
-
 @Service
-@Log
 public class AccountBankService {
 	
+	private static final Logger log = LoggerFactory.getLogger(AccountBankService.class);
+
 	private AccountBankMapper accountBankMapper;
 	private AccountBankPublish accountBankPublish;
 	

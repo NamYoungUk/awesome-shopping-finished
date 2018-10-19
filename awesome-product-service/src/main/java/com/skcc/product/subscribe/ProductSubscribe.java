@@ -12,7 +12,6 @@ import com.skcc.product.service.ProductService;
 
 @Component
 @EnableBinding(ProductInputChannel.class)
-@lombok.extern.java.Log
 public class ProductSubscribe {
 
 	private ProductService productService;
