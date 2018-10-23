@@ -1,1 +1,1 @@
-# awesome-shopping-finished
+# awesome-shoping-finished
