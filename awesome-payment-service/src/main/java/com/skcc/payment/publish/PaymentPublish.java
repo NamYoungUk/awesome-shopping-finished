@@ -28,6 +28,9 @@ public class PaymentPublish {
 	}
 	
 	public void send(PaymentEvent paymentEvent) {
-		this.paymentOutputChannel.getMessageChannel().send(MessageBuilder.withPayload(paymentEvent).setHeader("routeTo", domain + "." + paymentEvent.getEventType()).build());
+		this.paymentOutputChannel.getMessageChannel().send(
+		 MessageBuilder.withPayload(paymentEvent).setHeader(
+		 "routeTo", domain + "." + paymentEvent.getEventType()).build());
 	}
+	
 }

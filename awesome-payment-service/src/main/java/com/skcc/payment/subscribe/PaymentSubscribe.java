@@ -20,19 +20,18 @@ public class PaymentSubscribe {
 		this.paymentService = paymentService;
 	}
 	
-	@StreamListener(PaymentInputChannel.orderCreated)
-	public void receiveOrderCreatedEvent(OrderEvent orderEvent) {
-		this.paymentService.createPaymentAndCreatePublishEvent(orderEvent);
-	}
-	
-	@StreamListener(PaymentInputChannel.orderCanceled)
-	public void receiveOrderCanceledEvent(OrderEvent orderEvent) {
-		this.paymentService.cancelPaymentAndCreatePublishEvent(orderEvent);
-	}
-	
 	@StreamListener(PaymentInputChannel.orderPayFailed)
 	public void receiveOrderPayFailedEvent(OrderEvent orderEvent) {
 		this.paymentService.undoPayPaymentAndCreatePublishEvent(orderEvent);
 	}
 	
+	@StreamListener(PaymentInputChannel.orderCanceled)
+	public void receiveOrderCanceledEvent(OrderEvent orderEvent) {
+	    this.paymentService.cancelPaymentAndCreatePublishEvent(orderEvent);
+	}
+
+	@StreamListener(PaymentInputChannel.orderCreated)
+	public void receiveOrderCreatedEvent(OrderEvent orderEvent) {
+	    this.paymentService.createPaymentAndCreatePublishEvent(orderEvent);
+	}
 }

@@ -25,13 +25,13 @@ spring:
   cloud:
     stream:
       bindings:
-        orderCreated:
-          destination: orderExchange
-          group: payment.orderCreated
-          content-type: application/json
         orderCanceled:
           destination: orderExchange
           group: payment.orderCanceled
+          content-type: application/json
+        orderCreated:
+          destination: orderExchange
+          group: payment.orderCreated
           content-type: application/json
         orderPayFailed:
           destination: orderExchange
@@ -49,10 +49,6 @@ spring:
           content-type: application/json
       rabbit:
         bindings:
-          orderCreated:
-            consumer:
-              autoBindDlq: true
-              bindingRoutingKey: order.OrderCreated.#
           orderCanceled:
             consumer:
               autoBindDlq: true
@@ -68,10 +64,13 @@ spring:
           AccountBankOutput:
             producer:
               routing-key-expression: headers['routeTo']
+          orderCreated:
+            consumer:
+              autoBindDlq: true
+              bindingRoutingKey: order.OrderCreated.#
           PaymentOutput:
             producer:
               routing-key-expression: headers['routeTo']
-
 management:
   endpoints:
     web:

@@ -44,61 +44,53 @@ public class PaymentService {
 		return this.paymentMapper.findPaymentByAccountId(accountId); 
 	}
 	
+	public boolean createPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
+        boolean result = false;
+        Payment payment = this.convertOrderEventToPayment(orderEvent);
+        payment.setPaid("unpaid");
+        try {
+            this.paymentService.createPaymentAndCreatePublishPaymentCreatedEvent(orderEvent.getTxId(), payment);
+            result = true;
+        } catch(Exception e) {
+            try {
+                result = false;
+                e.printStackTrace();
+                this.paymentService.createPublishPaymentCreateFailedEvent(orderEvent.getTxId(), payment);
+            }catch(Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+        return result;
+    }
+	
+    @Transactional
+    public void createPaymentAndCreatePublishPaymentCreatedEvent(String txId, Payment payment) throws Exception {
+        this.createPaymentValidationCheck(payment);
+        Payment resultPayment = this.createPayment(payment);
+        this.createPublishPaymentEvent(txId, resultPayment, PaymentEventType.PaymentCreated);
+    }
+	
+    @Transactional
+    public void createPublishPaymentCreateFailedEvent(String txId, Payment payment) throws Exception{
+        this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCreateFailed);
+    }
+
+	
 	public Payment convertOrderEventToPayment(OrderEvent orderEvent) {
 		Payment payment = new Payment();
 		
 		payment.setId(orderEvent.getPayload().getPaymentId());
-		payment.setAccountId(orderEvent.getPayload().getOrderPayment().getAccountId());
-		payment.setOrderId(orderEvent.getPayload().getOrderPayment().getOrderId());
-		payment.setPaymentMethod(orderEvent.getPayload().getOrderPayment().getPaymentMethod());
-		payment.setPaymentDetail1(orderEvent.getPayload().getOrderPayment().getPaymentDetail1());
-		payment.setPaymentDetail2(orderEvent.getPayload().getOrderPayment().getPaymentDetail2());
-		payment.setPaymentDetail3(orderEvent.getPayload().getOrderPayment().getPaymentDetail3());
-		payment.setPrice(orderEvent.getPayload().getOrderPayment().getPrice());
-		payment.setPaid(orderEvent.getPayload().getOrderPayment().getPaid());
-		payment.setActive(orderEvent.getPayload().getOrderPayment().getActive());
+		payment.setAccountId(orderEvent.getPayload().getPaymentInfo().getAccountId());
+		payment.setOrderId(orderEvent.getPayload().getPaymentInfo().getOrderId());
+		payment.setPaymentMethod(orderEvent.getPayload().getPaymentInfo().getPaymentMethod());
+		payment.setPaymentDetail1(orderEvent.getPayload().getPaymentInfo().getPaymentDetail1());
+		payment.setPaymentDetail2(orderEvent.getPayload().getPaymentInfo().getPaymentDetail2());
+		payment.setPaymentDetail3(orderEvent.getPayload().getPaymentInfo().getPaymentDetail3());
+		payment.setPrice(orderEvent.getPayload().getPaymentInfo().getPrice());
+		payment.setPaid(orderEvent.getPayload().getPaymentInfo().getPaid());
+		payment.setActive(orderEvent.getPayload().getPaymentInfo().getActive());
 		
 		return payment;
-	}
-	
-	public boolean createPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
-		boolean result = false;
-		Payment payment = this.convertOrderEventToPayment(orderEvent);
-		payment.setPaid("unpaid");
-		try {
-			this.paymentService.createPaymentAndCreatePublishPaymentCreatedEvent(orderEvent.getTxId(), payment);
-			result = true;
-		} catch(Exception e) {
-			try {
-				result = false;
-				e.printStackTrace();
-				this.paymentService.createPublishPaymentCreateFailedEvent(orderEvent.getTxId(), payment);
-			}catch(Exception e1) {
-				e1.printStackTrace();
-			}
-		}
-		return result;
-	}
-	
-	public boolean cancelPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
-		boolean result = false;
-		String txId = orderEvent.getTxId();
-		Payment payment = this.findPaymentByOrderId(orderEvent.getOrderId());
-		if(payment == null)
-			return result;
-		try {
-			this.paymentService.cancelPaymentAndCreatePublishPaymentCanceledEvent(txId, payment);
-			result = true;
-		} catch(Exception e) {
-			try {
-				result = false;
-				e.printStackTrace();
-				this.paymentService.createPublishPaymentCancelFailedEvent(txId, payment);
-			}catch(Exception e1) {
-				e1.printStackTrace();
-			}
-		}
-		return result;
 	}
 	
 	public boolean payPaymentAndCreatePublishEvent(long id) {
@@ -141,18 +133,6 @@ public class PaymentService {
 	}
 	
 	@Transactional
-	public void createPaymentAndCreatePublishPaymentCreatedEvent(String txId, Payment payment) throws Exception {
-		this.createPaymentValidationCheck(payment);
-		Payment resultPayment = this.createPayment(payment);
-		this.createPublishPaymentEvent(txId, resultPayment, PaymentEventType.PaymentCreated);
-	}
-	
-	@Transactional
-	public void createPublishPaymentCreateFailedEvent(String txId, Payment payment) throws Exception{
-		this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCreateFailed);
-	}
-	
-	@Transactional
 	public void payPaymentAndCreatePublishPaymentPaidEvent(Payment payment) throws Exception{
 		this.payPaymentValidationCheck(payment);
 		this.setPaymentPaid(payment);
@@ -176,18 +156,39 @@ public class PaymentService {
 		this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentPayUndoFailed);
 	}
 	
-	@Transactional
-	public void cancelPaymentAndCreatePublishPaymentCanceledEvent(String txId, Payment payment) throws Exception{
-		this.cancelPaymentValidationCheck(payment);
-		this.cancelPayment(payment);
-		this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCanceled);
-	}
+	public boolean cancelPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
+        boolean result = false;
+        String txId = orderEvent.getTxId();
+        Payment payment = this.findPaymentByOrderId(orderEvent.getOrderId());
+        if(payment == null)
+            return result;
+        try {
+            this.paymentService.cancelPaymentAndCreatePublishPaymentCanceledEvent(txId, payment);
+            result = true;
+        } catch(Exception e) {
+            try {
+                result = false;
+                e.printStackTrace();
+                this.paymentService.createPublishPaymentCancelFailedEvent(txId, payment);
+            }catch(Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+        return result;
+    }
 	
-	@Transactional
-	public void createPublishPaymentCancelFailedEvent(String txId, Payment payment) throws Exception{
-		this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCancelFailed);
-	}
+    @Transactional
+    public void cancelPaymentAndCreatePublishPaymentCanceledEvent(String txId, Payment payment) throws Exception{
+        this.cancelPaymentValidationCheck(payment);
+        this.cancelPayment(payment);
+        this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCanceled);
+    }
 	
+    @Transactional
+    public void createPublishPaymentCancelFailedEvent(String txId, Payment payment) throws Exception{
+        this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCancelFailed);
+    }
+    
 	public void cancelPayment(Payment payment) {
 		this.paymentMapper.cancelPayment(payment);
 	}
@@ -298,6 +299,10 @@ public class PaymentService {
 	
 	public PaymentEvent findPreviousPaymentEvent(String txId, long paymentId) {
 		return this.paymentMapper.findPreviousPaymentEvent(txId, paymentId);
+	}
+	
+	public List<PaymentEvent> getPaymentEvent() {
+		return this.paymentMapper.getPaymentEvent();
 	}
 	
 }

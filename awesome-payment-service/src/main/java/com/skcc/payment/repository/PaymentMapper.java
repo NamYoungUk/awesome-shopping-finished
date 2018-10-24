@@ -26,12 +26,6 @@ public interface PaymentMapper {
 //	@Update("update payments set paid='paid' where id = #{id}")
 	public void setPaymentPaid(@Param("paid") String paid, @Param("id") long id);
 	
-//	@Select("select get_account_eventid_seq('eventId')")
-	public long getPaymentEventId();
-	
-//	@Insert("insert into payment_events(id,domain,paymentId,eventType,paymentInfo,txId,createdAt) values(#{id}, #{domain}, #{paymentId}, #{eventType}, #{paymentInfo}, #{txId}, NOW())")
-	public void createPaymentEvent(PaymentEvent paymentEvent);
-	
 //	@select("select * from payments where id=#{id} and paid='unpaid'")
 	public Payment findunPaidPaymentById(long id);
 	
@@ -43,5 +37,14 @@ public interface PaymentMapper {
 	
 //	@select("select * from payment_events where paymentId = #{paymentId} and id = (select max(id) from payment_events where paymentId = #{paymentId} and id < (select min(id) from payment_events where paymentId = #{paymentId} and txId = #{txId}))")
 	public PaymentEvent findPreviousPaymentEvent(@Param("txId") String txId, @Param("paymentId") long paymentId);
+	
+//	@select("select * from payment_events")
+	public List<PaymentEvent> getPaymentEvent();
+	
+//	@Select("select get_account_eventid_seq('eventId')")
+	public long getPaymentEventId();
+	
+//	@Insert("insert into payment_events(id,domain,paymentId,eventType,paymentInfo,txId,createdAt) values(#{id}, #{domain}, #{paymentId}, #{eventType}, #{paymentInfo}, #{txId}, NOW())")
+	public void createPaymentEvent(PaymentEvent paymentEvent);
 	
 }
