@@ -32,5 +32,4 @@ public class PaymentPublish {
 		 MessageBuilder.withPayload(paymentEvent).setHeader(
 		 "routeTo", domain + "." + paymentEvent.getEventType()).build());
 	}
-	
 }

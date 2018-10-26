@@ -6,9 +6,5 @@ public enum PaymentEventType {
 	,PaymentCanceled
 	,PaymentCreateFailed
 	,PaymentCancelFailed
-	,PaymentPaid
-	,PaymentPayUndo
-	,PaymentPayFailed
-	,PaymentPayUndoFailed
-
+	
 }

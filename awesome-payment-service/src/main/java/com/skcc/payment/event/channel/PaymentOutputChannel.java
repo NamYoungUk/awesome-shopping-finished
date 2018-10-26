@@ -4,10 +4,8 @@ import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.messaging.MessageChannel;
 
 public interface PaymentOutputChannel {
+	String paymentOutput = "paymentOutput";
 	
-	String PaymentOutput = "PaymentOutput";
-	
-	@Output(PaymentOutputChannel.PaymentOutput)
+	@Output(PaymentOutputChannel.paymentOutput)
 	MessageChannel getMessageChannel();
-
 }

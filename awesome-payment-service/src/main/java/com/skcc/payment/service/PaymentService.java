@@ -40,122 +40,6 @@ public class PaymentService {
 		this.paymentPublish = paymentPublish;
 	}
 	
-	public List<Payment> findPaymentByAccountId(long accountId) {
-		return this.paymentMapper.findPaymentByAccountId(accountId); 
-	}
-	
-	public boolean createPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
-        boolean result = false;
-        Payment payment = this.convertOrderEventToPayment(orderEvent);
-        payment.setPaid("unpaid");
-        try {
-            this.paymentService.createPaymentAndCreatePublishPaymentCreatedEvent(orderEvent.getTxId(), payment);
-            result = true;
-        } catch(Exception e) {
-            try {
-                result = false;
-                e.printStackTrace();
-                this.paymentService.createPublishPaymentCreateFailedEvent(orderEvent.getTxId(), payment);
-            }catch(Exception e1) {
-                e1.printStackTrace();
-            }
-        }
-        return result;
-    }
-	
-    @Transactional
-    public void createPaymentAndCreatePublishPaymentCreatedEvent(String txId, Payment payment) throws Exception {
-        this.createPaymentValidationCheck(payment);
-        Payment resultPayment = this.createPayment(payment);
-        this.createPublishPaymentEvent(txId, resultPayment, PaymentEventType.PaymentCreated);
-    }
-	
-    @Transactional
-    public void createPublishPaymentCreateFailedEvent(String txId, Payment payment) throws Exception{
-        this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCreateFailed);
-    }
-
-	
-	public Payment convertOrderEventToPayment(OrderEvent orderEvent) {
-		Payment payment = new Payment();
-		
-		payment.setId(orderEvent.getPayload().getPaymentId());
-		payment.setAccountId(orderEvent.getPayload().getPaymentInfo().getAccountId());
-		payment.setOrderId(orderEvent.getPayload().getPaymentInfo().getOrderId());
-		payment.setPaymentMethod(orderEvent.getPayload().getPaymentInfo().getPaymentMethod());
-		payment.setPaymentDetail1(orderEvent.getPayload().getPaymentInfo().getPaymentDetail1());
-		payment.setPaymentDetail2(orderEvent.getPayload().getPaymentInfo().getPaymentDetail2());
-		payment.setPaymentDetail3(orderEvent.getPayload().getPaymentInfo().getPaymentDetail3());
-		payment.setPrice(orderEvent.getPayload().getPaymentInfo().getPrice());
-		payment.setPaid(orderEvent.getPayload().getPaymentInfo().getPaid());
-		payment.setActive(orderEvent.getPayload().getPaymentInfo().getActive());
-		
-		return payment;
-	}
-	
-	public boolean payPaymentAndCreatePublishEvent(long id) {
-		boolean result = false;
-		Payment resultPayment = this.findUnpaidPaymentById(id);
-		resultPayment.setPaid("paid");
-		try {
-			this.paymentService.payPaymentAndCreatePublishPaymentPaidEvent(resultPayment);
-			result = true;
-		} catch(Exception e) {
-			try {
-				result = false;
-				e.printStackTrace();
-				this.paymentService.createPublishPaymentPayFailedEvent(resultPayment);
-			}catch(Exception e1) {
-				e1.printStackTrace();
-			}
-		}
-		return result;
-	}
-	
-	public boolean undoPayPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
-		boolean result = false;
-		
-		String txId = orderEvent.getTxId();
-		Payment resultPayment = this.convertPaymentEventToPayment(this.findPreviousPaymentEvent(txId, orderEvent.getPayload().getPaymentId()));
-		try {
-			this.paymentService.undoPayPaymentAndCreatePublishPaymentPayUndoEvent(txId, resultPayment);
-			result = true;
-		} catch(Exception e) {
-			try {
-				result = false;
-				e.printStackTrace();
-				this.paymentService.createPublishPaymentPayUndoFailedEvent(txId, resultPayment);
-			}catch(Exception e1) {
-				e1.printStackTrace();
-			}
-		}
-		return result;
-	}
-	
-	@Transactional
-	public void payPaymentAndCreatePublishPaymentPaidEvent(Payment payment) throws Exception{
-		this.payPaymentValidationCheck(payment);
-		this.setPaymentPaid(payment);
-		this.createPublishPaymentEvent(null, payment, PaymentEventType.PaymentPaid);
-	}
-	
-	@Transactional
-	public void createPublishPaymentPayFailedEvent(Payment payment) throws Exception{
-		this.createPublishPaymentEvent(null, payment, PaymentEventType.PaymentPayFailed);
-	}
-	
-	@Transactional
-	public void undoPayPaymentAndCreatePublishPaymentPayUndoEvent(String txId, Payment payment) throws Exception{
-		this.undoPayPaymentValidationCheck(payment);
-		this.undoPayPayment(payment);
-		this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentPayUndo);
-	}
-	
-	@Transactional
-	public void createPublishPaymentPayUndoFailedEvent(String txId, Payment payment) throws Exception{
-		this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentPayUndoFailed);
-	}
-	
 	public boolean cancelPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
         boolean result = false;
         String txId = orderEvent.getTxId();
@@ -188,7 +72,38 @@ public class PaymentService {
     public void createPublishPaymentCancelFailedEvent(String txId, Payment payment) throws Exception{
         this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCancelFailed);
     }
-    
+	
+	public boolean createPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
+        boolean result = false;
+        Payment payment = this.convertOrderEventToPayment(orderEvent);
+        payment.setPaid("unpaid");
+        try {
+            this.paymentService.createPaymentAndCreatePublishPaymentCreatedEvent(orderEvent.getTxId(), payment);
+            result = true;
+        } catch(Exception e) {
+            try {
+                result = false;
+                e.printStackTrace();
+                this.paymentService.createPublishPaymentCreateFailedEvent(orderEvent.getTxId(), payment);
+            }catch(Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+        return result;
+    }
+	
+    @Transactional
+    public void createPaymentAndCreatePublishPaymentCreatedEvent(String txId, Payment payment) throws Exception {
+        this.createPaymentValidationCheck(payment);
+        Payment resultPayment = this.createPayment(payment);
+        this.createPublishPaymentEvent(txId, resultPayment, PaymentEventType.PaymentCreated);
+    }
+	
+    @Transactional
+    public void createPublishPaymentCreateFailedEvent(String txId, Payment payment) throws Exception{
+        this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCreateFailed);
+    }
+	
 	public void cancelPayment(Payment payment) {
 		this.paymentMapper.cancelPayment(payment);
 	}
@@ -200,10 +115,6 @@ public class PaymentService {
 			throw new Exception();
 	}
 
-	public void setPaymentPaid(Payment payment) {
-		this.paymentMapper.setPaymentPaid(payment.getPaid(), payment.getId());
-	}
-	
 	public Payment createPayment(Payment payment) {
 		this.paymentMapper.createPayment(payment);
 		return payment;
@@ -227,8 +138,29 @@ public class PaymentService {
 		return this.paymentMapper.findById(id);
 	}
 	
-	public void undoPayPayment(Payment payment) {
-		this.paymentMapper.undoPayPayment(payment);
+	public long getPaymentEventId() {
+		return this.paymentMapper.getPaymentEventId();
+	}
+	
+	public List<Payment> findPaymentByAccountId(long accountId) {
+		return this.paymentMapper.findPaymentByAccountId(accountId); 
+	}
+	
+	public Payment convertOrderEventToPayment(OrderEvent orderEvent) {
+		Payment payment = new Payment();
+		
+		payment.setId(orderEvent.getPayload().getPaymentId());
+		payment.setAccountId(orderEvent.getPayload().getPaymentInfo().getAccountId());
+		payment.setOrderId(orderEvent.getPayload().getPaymentInfo().getOrderId());
+		payment.setPaymentMethod(orderEvent.getPayload().getPaymentInfo().getPaymentMethod());
+		payment.setPaymentDetail1(orderEvent.getPayload().getPaymentInfo().getPaymentDetail1());
+		payment.setPaymentDetail2(orderEvent.getPayload().getPaymentInfo().getPaymentDetail2());
+		payment.setPaymentDetail3(orderEvent.getPayload().getPaymentInfo().getPaymentDetail3());
+		payment.setPrice(orderEvent.getPayload().getPaymentInfo().getPrice());
+		payment.setPaid(orderEvent.getPayload().getPaymentInfo().getPaid());
+		payment.setActive(orderEvent.getPayload().getPaymentInfo().getActive());
+		
+		return payment;
 	}
 	
 	public Payment convertPaymentEventToPayment(PaymentEvent paymentEvent) {
@@ -257,7 +189,7 @@ public class PaymentService {
 			payment = this.findById(id);
 		
 		PaymentEvent paymentEvent = new PaymentEvent();
-		paymentEvent.setId(this.paymentMapper.getPaymentEventId());
+		paymentEvent.setId(this.getPaymentEventId());
 		paymentEvent.setPaymentId(id);
 		paymentEvent.setDomain(domain);
 		paymentEvent.setEventType(paymentEventType);
@@ -283,15 +215,6 @@ public class PaymentService {
 		Payment payment = this.paymentMapper.findunPaidPaymentById(id);
 		return payment;
 	}
-	
-	public void payPaymentValidationCheck(Payment payment) throws Exception {
-		if(payment.getPaid() == null || (payment.getPaid().equals("")))
-			throw new Exception();
-		if(!"active".equals(payment.getActive()))
-			throw new Exception();
-	}
-	
-	public void undoPayPaymentValidationCheck(Payment payment) {}
 	
 	public Payment findPaymentByOrderId(long orderId) {
 		return this.paymentMapper.findPaymentByOrderId(orderId);
