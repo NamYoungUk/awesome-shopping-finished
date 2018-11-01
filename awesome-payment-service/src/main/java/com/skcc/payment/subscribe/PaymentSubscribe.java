@@ -24,7 +24,7 @@ public class PaymentSubscribe {
 	public void receiveOrderCreatedEvent(OrderEvent orderEvent) {
 	    this.paymentService.createPaymentAndCreatePublishEvent(orderEvent);
 	}
-
+	
 	@StreamListener(PaymentInputChannel.orderCanceled)
 	public void receiveOrderCanceledEvent(OrderEvent orderEvent) {
 	    this.paymentService.cancelPaymentAndCreatePublishEvent(orderEvent);

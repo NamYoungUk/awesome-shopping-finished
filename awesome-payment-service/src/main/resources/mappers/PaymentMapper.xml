@@ -64,14 +64,14 @@
 	</select>
 	
 	<select id="getPaymentEventId" resultType="long">
-		select get_sequence('eventId')
+		select event_seq.nextval;
 	</select>
-		
+	
 	<insert id="createPaymentEvent" parameterMap="PaymentEvent">
 		insert into payment_events (id, domain, paymentId, eventType, payload, txId, createdAt)
 		values(#{id}, #{domain}, #{paymentId}, #{eventType}
 		, #{payload, typeHandler = com.skcc.payment.config.PaymentPayloadJsonTypeHandler}
 		, #{txId}, NOW())
 	</insert>
-		
+	
 </mapper>

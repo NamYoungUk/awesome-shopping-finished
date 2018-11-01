@@ -9,14 +9,30 @@ spring:
   application:
     name: awesome-payment-service
   datasource:
-    url: jdbc:mysql://localhost:3309/awesome
-    username: root
-    password: awesome-mariadb
-    platform: mysql
+    platform: h2
+    url: jdbc:h2:mem:testdb;
+    username: sa
+    password: null
+    driver-class-name: org.h2.Driver
     initialization-mode: always
-#    driver-class-name: com.mysql.jdbc.Driver
+  h2:
+    console:
+      enabled: true
   cloud:
     stream:
+      rabbit:
+        bindings:
+          orderCanceled:
+            consumer:
+              autoBindDlq: true
+              bindingRoutingKey: order.OrderCanceled.#
+          orderCreated:
+            consumer:
+              autoBindDlq: true
+              bindingRoutingKey: order.OrderCreated.#
+          paymentOutput:
+            producer:
+              routing-key-expression: headers['routeTo']
       binders:
         rabbitmq:
           type: rabbit
@@ -28,31 +44,17 @@ spring:
                 username: labs
                 password: awesome-rabbitmq
       bindings:
-        orderCreated:
-          destination: orderExchange
-          group: payment.orderCreated
-          content-type: application/json
         orderCanceled:
           destination: orderExchange
           group: payment.orderCanceled
           content-type: application/json
-        PaymentOutput:
+        orderCreated:
+          destination: orderExchange
+          group: payment.orderCreated
+          content-type: application/json
+        paymentOutput:
           destination: paymentExchange
           content-type: application/json
-      rabbit:
-        bindings:
-          orderCreated:
-            consumer:
-              autoBindDlq: true
-              bindingRoutingKey: order.OrderCreated.#
-          orderCanceled:
-              consumer:
-                autoBindDlq: true
-              bindingRoutingKey: order.OrderCanceled.#
-          PaymentOutput:
-            producer:
-              routing-key-expression: headers['routeTo']
-              
 management:
   endpoints:
     web:

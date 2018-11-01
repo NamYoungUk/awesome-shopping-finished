@@ -40,7 +40,38 @@ public class PaymentService {
 		this.paymentPublish = paymentPublish;
 	}
 	
-	public boolean cancelPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
+	public boolean createPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
+        boolean result = false;
+        Payment payment = this.convertOrderEventToPayment(orderEvent);
+        payment.setPaid("unpaid");
+        try {
+            this.paymentService.createPaymentAndCreatePublishPaymentCreatedEvent(orderEvent.getTxId(), payment);
+            result = true;
+        } catch(Exception e) {
+            try {
+                result = false;
+                e.printStackTrace();
+                this.paymentService.createPublishPaymentCreateFailedEvent(orderEvent.getTxId(), payment);
+            }catch(Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+        return result;
+    }
+	
+    @Transactional
+    public void createPaymentAndCreatePublishPaymentCreatedEvent(String txId, Payment payment) throws Exception {
+        this.createPaymentValidationCheck(payment);
+        Payment resultPayment = this.createPayment(payment);
+        this.createPublishPaymentEvent(txId, resultPayment, PaymentEventType.PaymentCreated);
+    }
+	
+    @Transactional
+    public void createPublishPaymentCreateFailedEvent(String txId, Payment payment) throws Exception{
+        this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCreateFailed);
+    }
+
+    public boolean cancelPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
         boolean result = false;
         String txId = orderEvent.getTxId();
         Payment payment = this.findPaymentByOrderId(orderEvent.getOrderId());
@@ -71,37 +102,6 @@ public class PaymentService {
     @Transactional
     public void createPublishPaymentCancelFailedEvent(String txId, Payment payment) throws Exception{
         this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCancelFailed);
-    }
-	
-	public boolean createPaymentAndCreatePublishEvent(OrderEvent orderEvent) {
-        boolean result = false;
-        Payment payment = this.convertOrderEventToPayment(orderEvent);
-        payment.setPaid("unpaid");
-        try {
-            this.paymentService.createPaymentAndCreatePublishPaymentCreatedEvent(orderEvent.getTxId(), payment);
-            result = true;
-        } catch(Exception e) {
-            try {
-                result = false;
-                e.printStackTrace();
-                this.paymentService.createPublishPaymentCreateFailedEvent(orderEvent.getTxId(), payment);
-            }catch(Exception e1) {
-                e1.printStackTrace();
-            }
-        }
-        return result;
-    }
-	
-    @Transactional
-    public void createPaymentAndCreatePublishPaymentCreatedEvent(String txId, Payment payment) throws Exception {
-        this.createPaymentValidationCheck(payment);
-        Payment resultPayment = this.createPayment(payment);
-        this.createPublishPaymentEvent(txId, resultPayment, PaymentEventType.PaymentCreated);
-    }
-	
-    @Transactional
-    public void createPublishPaymentCreateFailedEvent(String txId, Payment payment) throws Exception{
-        this.createPublishPaymentEvent(txId, payment, PaymentEventType.PaymentCreateFailed);
     }
 	
 	public void cancelPayment(Payment payment) {
